@@ -1,0 +1,121 @@
+Terra Gen
+
+GenerateWorld(int width, int height) {
+World world = new World(width, height);
+/// Depth Contours
+int surfaceHeight = height * Rand(0.08, 0.12);
+int undergroundHeight = height * Rand(0.18, 0.21);
+int cavernHeight = height * Rand(0.27, 0.31);
+int underworldHeight = height * Rand (0.85, 0.88);
+int[] surfaceHeights = GenerateTerrain(surfaceHeight);
+int[] undergroundHeights = GenerateTerrain(undergroundHeight);
+int[] cavernHeights = GenerateTerrain(cavernHeight);
+int[] underworldHeights = GenerateTerrain(underworldHeight);
+world.GenerateLayers(surfaceHeights, cavernHeights);
+/// Add Sand
+world.GenerateDeserts(surfaceHeights);
+world.GenerateSandPiles(undergroundHeight, cavernHeight);
+/// Mix Stone into Dirt
+world.GenerateSurface(surfaceHeights, undergroundHeights);
+world.GenerateUnderground(undergroundHeights, cavernHeights);
+/// Mix Dirt into Stone
+world.GenerateCavern(cavernHeights, underworldHeights);
+/// Add Clay
+world.GenerateClay(surfaceHeights, undergroundHeights, cavernHeights);
+return world;
+}
+
+int[] GenerateTerrain(int h) {
+	int[] terrainHeight;
+	for(int i = 0, i < Width, i++) { terrainHeight[i] = h + Rand; }
+	return terrainHeight;
+}
+
+class World {
+
+Tile[][] tiles;
+int width;
+int height;
+
+World(int w, int h) {
+	tiles = new Tile[w][h];
+	width = w;
+	height = h;
+}
+
+void GenerateLayers(int[] dirtLevel, int[] stoneLevel) {
+	for(int x = 0, x < Width, x++) {
+		int dirt = dirtLevel[x];
+		int stone = stoneLevel[x];
+		for(int y = 0, y < dirt, y++) { tiles[x][y] = Tile.Air; }
+		tiles[x][dirt] = Tile.Grass;
+		for(int y = dirt, y < stone, y++) { tiles[x][y] = Tile.Dirt; }
+		for(int y = stone, y < Height, y++) { tiles[x][y] = Tile.Stone; }
+} }
+
+// Choose a block on surface and create a circle. Set any block to Sand within circle
+void GenerateDeserts(int[] surfaceLevel) {
+	int desertCount = Floor(Rand(2,4));
+	for(int i = 0; i < desertCount; i++) {
+		int desertStart = Rand(0, width);
+		int desertSize = Rand(50, 200);
+		for (int x = desertStart; x < desertStart + desertSize; x++) {
+			int h = surfaceLevel[x];
+			int desertHeight = 0—50 randomWalkUpThenDown;
+			for (int y = h; y < h + desertHeight; y++) {
+				tiles[x][y] = Tile.Sand;
+} } } }
+
+const float sandPileScale = 1;
+const float sandPileCutoff = 0.2;
+void GenerateSandPiles(int start, int end) {
+	for(int x = 0; x < Width; x++) {
+		for (int y = start; y < end; y++) {
+			float n = noise(x * sandPileScale, y * sandPileScale);
+			if (n > sandPileCutoff) { continue; }
+			tiles[x][y] = Tile.Sand;
+} } }
+
+const int surfaceStoneScale = 5;
+const int surfaceStoneCutoff = 0.3;
+void GenerateSurface(int[] start, int[] end) {
+	for(int x = 0; x < Width; x++) {
+		for (int y = start[x]; y < end[x]; y++) {
+			float n = noise(x * surfaceStoneScale, y * surfaceStoneScale);
+			if (n > surfaceStoneCutoff) { continue; }
+			tiles[x][y] = Tile.Stone;
+}
+
+const int undergroundStoneScale = 6;
+const int undergroundStoneCutoff = 0.6;
+void GenerateUnderground(int[] start, int[] end) {
+	for(int x = 0; x < Width; x++) {
+		for (int y = start[x]; y < end[x]; y++) {
+			float n = noise(x * undergroundStoneScale, y * undergroundStoneScale);
+			if (n > undergroundStoneCutoff) { continue; }
+			tiles[x][y] = Tile.Stone;
+}
+
+const int cavernDirtScale = 6;
+const int cavernDirtCutoff = 0.6;
+void GenerateCavern(int[] start, int[] end) {
+	for(int x = 0; x < Width; x++) {
+		for (int y = start[x]; y < end[x]; y++) {
+			float n = noise(x * cavernDirtScale, y * cavernDirtScale);
+			if (n > cavernDirtCutoff) { continue; }
+			tiles[x][y] = Tile.Dirt;
+}
+
+const int clayScale = 2;
+const int clayCutoff = 0.2;
+void GenerateCavern(int[] start, int[] mid, int[] end) {
+	for(int x = 0; x < Width; x++) {
+		for (int y = start[x]; y < mid[x]; y++) {
+			float n = noise(x * clayScale, y * clayScale);
+			if (n > clayCutoff) { continue; }
+			tiles[x][y] = Tile.Clay;
+		for (int y = mid[x]; y < end[x] + 10; y++) {
+			float n = noise(x * clayScale, y * clayScale);
+			if (n > clayCutoff / 2) { continue; }
+			tiles[x][y] = Tile.Clay;
+}
